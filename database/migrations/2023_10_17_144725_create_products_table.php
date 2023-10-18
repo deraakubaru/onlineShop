@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('category_id');
             $table->string('product_name');
             $table->text('description');
-            $table->decimal('price', 10, 2);
+            $table->decimal('price', 10, 2)->default(0.00);
             $table->integer('quantity');
             $table->timestamps();
 
