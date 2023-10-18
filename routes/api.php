@@ -38,15 +38,35 @@ Route::middleware(['auth:second'])->group(function () {
     //authenticated product routes
     Route::post('products', [ProductController::class, 'store'])->name('product-create');
     Route::put('products/{id}', [ProductController::class, 'update'])->name('product-update');
-    Route::put('products/{id}', [ProductController::class, 'destroy'])->name('product-delete');
+    Route::delete('products/{id}', [ProductController::class, 'destroy'])->name('product-delete');
 
     //order routes
     Route::get('orders', [OrderController::class, 'index'])->name('orders');
     Route::get('orders/{id}', [OrderController::class, 'show'])->name('order');
     
+    //order detail routes
+    Route::get('order-details', [OrderDetailController::class, 'index'])->name('orders-details');
+    Route::get('orders-details/{id}', [OrderDetailController::class, 'show'])->name('order-detail');
+
+    
     //cart routes
     Route::get('carts', [CartController::class, 'index'])->name('carts');
     Route::post('carts', [CartController::class, 'addToCart'])->name('cart-create');
+    Route::put('carts/{id}', [CartController::class, 'updateCartItem'])->name('cart-update');
+    Route::delete('carts/{id}', [CartController::class, 'removeCartItem'])->name('cart-delete');
+    Route::post('checkout', [CartController::class, 'checkout'])->name('check-out');
+
+    //balance routes
+    Route::get('balance', [BalanceController::class, 'show'])->name('balance');
+    Route::get('store-balance/{id}', [BalanceController::class, 'showStoreBalance'])->name('store-balance');
+    Route::post('balance', [BalanceController::class, 'topUp'])->name('top-up');
+    Route::post('store-balance/{id}', [BalanceController::class, 'topUpToko'])->name('top-up-store');
+
+    //category routes
+    Route::get('categories', [CategoryController::class, 'index'])->name('categories');
+    Route::post('categories', [CategoryController::class, 'store'])->name('category-create');
+    Route::put('categories/{id}', [CategoryController::class, 'update'])->name('category-update');
+    Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->name('category-delete');
 });
 
 //Store routes
