@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\CustomLoginController;
 use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
@@ -27,8 +28,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 //Authentication routes
 Auth::routes();
+Route::post('/getToken', [CustomLoginController::class, 'login']);
 
-Route::middleware(['auth:second'])->group(function () {
+Route::middleware(['auth:api'])->group(function () {
 
     //authenticated store routes
     Route::post('stores', [StoreController::class, 'store'])->name('store-create');
@@ -36,9 +38,13 @@ Route::middleware(['auth:second'])->group(function () {
     Route::delete('stores/{id}', [StoreController::class, 'destroy'])->name('store-delete');
 
     //authenticated product routes
-    Route::post('products', [ProductController::class, 'store'])->name('product-create');
+Route::post('products', [ProductController::class, 'store'])->name('product-create');
     Route::put('products/{id}', [ProductController::class, 'update'])->name('product-update');
     Route::delete('products/{id}', [ProductController::class, 'destroy'])->name('product-delete');
+
+    //flash sales routes
+    Route::post('products/{product}/associate-with-flash-sale/{flashSale}', [ProductController::class, 'associateWithFlashSale']);
+    Route::post('products/{product}/associate-with-flash-sale', [ProductController::class, 'disassociateWithFlashSale']);
 
     //order routes
     Route::get('orders', [OrderController::class, 'index'])->name('orders');

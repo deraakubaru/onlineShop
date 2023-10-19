@@ -58,4 +58,18 @@ class ProductController extends Controller
         $product->delete();
         return response()->json(['message' => 'Produk telah dihapus!']);
     }
+
+    public function associateWithFlashSale(Product $product, FlashSale $flashSale){
+        $product->flash_sale_id = $flashSale->id;
+        $product->save();
+
+        return response()->json(['message' => 'Produk telah masuk kedalam produk flash sale']);
+    }
+
+    public function disassociateWithFlashSale(Product $product){
+        $product->flash_sale_id = null;
+        $product->save();
+
+        return response()->json(['message' => 'Produk telah kembali normal']);
+    }
 }

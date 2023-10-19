@@ -20,6 +20,7 @@ class StoreController extends Controller
     
     public function store(){
         $attributes = request()->validate([
+            'user_id' => 'required|exists:users,id',
             'store_name' => 'required|string',
             'description' => 'required|string'
         ]);
