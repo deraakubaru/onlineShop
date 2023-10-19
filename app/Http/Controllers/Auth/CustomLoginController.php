@@ -9,6 +9,11 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CustomLoginController extends Controller
 {
+
+
+    //This Custom Used for checking endpoints in postman, with jwt tokens.
+
+
     /**
      * Handle an authentication attempt.
      *

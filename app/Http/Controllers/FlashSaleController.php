@@ -51,6 +51,8 @@ class FlashSaleController extends Controller
         return response()->json(['message' => 'Flash sale telah dihapus']);
     }
 
+
+    //in case flash sale need to be done
     public function endFlashSale(FlashSale $flashSale){
         $flashSale->end_time = now();
         $flashSale->save();

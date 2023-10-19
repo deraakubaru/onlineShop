@@ -62,6 +62,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('carts', [CartController::class, 'addToCart'])->name('cart-create');
     Route::put('carts/{id}', [CartController::class, 'updateCartItem'])->name('cart-update');
     Route::delete('carts/{id}', [CartController::class, 'removeCartItem'])->name('cart-delete');
+    //TRANSACTION
     Route::post('checkout', [CartController::class, 'checkout'])->name('check-out');
 
     //balance routes
