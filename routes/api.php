@@ -10,6 +10,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\FlashSaleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +28,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 //Authentication routes
-Auth::routes();
+// Auth::routes();
 Route::post('/getToken', [CustomLoginController::class, 'login']);
 
 Route::middleware(['auth:api'])->group(function () {
@@ -38,11 +39,12 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('stores/{id}', [StoreController::class, 'destroy'])->name('store-delete');
 
     //authenticated product routes
-Route::post('products', [ProductController::class, 'store'])->name('product-create');
+    Route::post('products', [ProductController::class, 'store'])->name('product-create');
     Route::put('products/{id}', [ProductController::class, 'update'])->name('product-update');
     Route::delete('products/{id}', [ProductController::class, 'destroy'])->name('product-delete');
 
     //flash sales routes
+    Route::post('flash-sales', [FlashSaleController::class, 'store'])->name('flash-sale-create');
     Route::post('products/{product}/associate-with-flash-sale/{flashSale}', [ProductController::class, 'associateWithFlashSale']);
     Route::post('products/{product}/associate-with-flash-sale', [ProductController::class, 'disassociateWithFlashSale']);
 
@@ -73,6 +75,7 @@ Route::post('products', [ProductController::class, 'store'])->name('product-crea
     Route::post('categories', [CategoryController::class, 'store'])->name('category-create');
     Route::put('categories/{id}', [CategoryController::class, 'update'])->name('category-update');
     Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->name('category-delete');
+
 });
 
 //Store routes

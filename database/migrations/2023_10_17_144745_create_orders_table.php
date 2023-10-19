@@ -16,9 +16,9 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->dateTime('order_date');
-            $table->decimal('total_amount', 10, 2);
-            $table->string('status');
+            $table->timestamp('order_date')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->decimal('total_amount', 10, 2)->default(0.00);
+            $table->string('status')->nullable();
             $table->timestamps();
             
             $table->foreign('user_id')->references('id')->on('users');

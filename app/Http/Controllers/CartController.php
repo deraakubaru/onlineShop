@@ -6,9 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Cart;
-use App\Moedels\User;
-use App\Moedels\Order;
-use App\Moedels\OrderDetail;
+use App\Models\User;
+use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\Product;
+use App\Models\Store;
+use App\Models\FlashSale;
 
 class CartController extends Controller
 {
@@ -22,7 +25,7 @@ class CartController extends Controller
 
     public function addToCart(){
         $attributes = request()->validate([
-            'user_id' => 'required|exists:user,id',
+            'user_id' => 'required|exists:users,id',
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer',
         ]);
@@ -48,50 +51,76 @@ class CartController extends Controller
         return response()->json(['message' => 'Produk berhasil dihapus dalam keranjang.']);
     }
 
-    public function checkout(Request $request){
+    public function checkout(){
         $user = Auth::user();
         $cartItems = Cart::where('user_id', $user->id)->get();
 
         DB::beginTransaction();
-        try{
+
+        try {
             $totalAmount = 0;
+            $orderDetails = [];
 
             $order = Order::create(['user_id' => $user->id]);
 
-            foreach($cartItems as $cartItem){
+            foreach ($cartItems as $cartItem) {
                 $product = Product::where('id', $cartItem->product_id)->lockForUpdate()->first();
 
-                if($cartItem->quantity > $product->quantity){
-                    DB::rollBack();
-                    return response()->json(['error' => 'Pembelian melebihi stock yang tersedia!']);
+                if ($cartItem->quantity > $product->quantity) {
+                    throw new \Exception('Pembelian melebihi stock yang tersedia!');
                 }
 
-                $product->quantity -= $charItem->quantity;
-                $product->save();
+                $subtotal = $product->price * $cartItem->quantity;
 
-                $orderDetail = OrderDetail::create([
+                if($product->flash_sale_id !== null){
+                    $flashSale = FlashSale::find($product->flash_sale_id);
+                    $flashSaleDiscount = $flashSale->discount_percentage / 100;
+                    $subtotal = $subtotal * (1 - $flashSaleDiscount);
+                }
+                $totalAmount += $subtotal;
+
+                $orderDetails[] = [
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'quantity' => $cartItem->quantity,
-                ]);
+                    'subtotal' => $subtotal,
+                ];
 
-                $totalAmount += $product->price * $cartItem->quantity;
-
-                $cartItem->delete();
+                // Reduce the product's quantity after each cart item
+                $product->quantity -= $cartItem->quantity;
+                $product->save();
             }
 
-            if($totalAmount > $user->balance){
-                DB::rollBack();
-                return response()->json(['error' => 'Uang anda tidak cukup!']);
+            if ($totalAmount > $user->balance) {
+                throw new \Exception('Uang anda tidak cukup!');
             }
 
+            //Reduce user's balance
             $user->balance -= $totalAmount;
             $user->save();
 
+            //increase store's balance with total amount
+            $store = Store::find($product->store_id);
+            $store->balance += $totalAmount;
+            $store->save();
+
+            //add total amount to orders
+            $order->total_amount = $totalAmount;
+            $order->save();
+
+            //Create order details in a from array above
+            OrderDetail::insert($orderDetails);
+
+            //Remove cart items
+            $cartItems->each->delete();
+
+            DB::commit();
+
             return response()->json(['message' => 'Pembelian berhasil!']);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Proses pembelian gagal! Silahkan cobalagi.']);
+            return response()->json(['error' => $e->getMessage()]);
         }
     }
+
 }
